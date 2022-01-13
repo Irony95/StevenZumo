@@ -1,7 +1,11 @@
 // ---------------------------------------------------------------------------
 // Example NewPing library sketch that does a ping about 20 times per second.
 // ---------------------------------------------------------------------------
-
+#include <ZumoBuzzer.h>
+#include <Pushbutton.h>
+#include <ZumoMotors.h>
+#include <QTRSensors.h>
+#include <ZumoReflectanceSensorArray.h>
 #include <NewPing.h>
 
 #define TRIGGER_PIN  6  // Arduino pin tied to trigger pin on the ultrasonic sensor.
@@ -37,7 +41,7 @@ void loop() {
   delay(50);   
   Serial.print("Front: ");
   Serial.print(cm); 
-  Serial.print("cm");
+    Serial.print("cm");
 
   Serial.print("  Right ");
   Serial.print(cmR); 

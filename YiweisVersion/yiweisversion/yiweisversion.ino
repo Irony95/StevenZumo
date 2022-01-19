@@ -10,15 +10,16 @@
 #define ECHO_PIN     A0
 #define ECHO_PINL     2  
 #define ECHO_PINR     11
-#define ServoPin     13
+#define SERVO_PIN     13
 #define MAX_DISTANCE 200 // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
-#define PUSH_DISTANCE 10
+#define PUSH_DISTANCE 50
+#define FLIPPER_DISTANCE 10
 
 NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);  
 NewPing sonarL(TRIGGER_PIN, ECHO_PINL, MAX_DISTANCE); 
 NewPing sonarR(TRIGGER_PIN, ECHO_PINR, MAX_DISTANCE);
 
-
+Servo flipper;
 
 
 #define QTR_THRESHOLD  1000 // my robot 300
@@ -43,13 +44,13 @@ unsigned int var;
  
 ZumoReflectanceSensorArray sensors(QTR_NO_EMITTER_PIN);
    
-long cm, cmL, cmR, cmB;
+long cm, cmL, cmR;
+int pos, restingAngle = 20, flippedAngle = 60;
+
 
 void waitForButtonAndCountDown()
 {
-  //digitalWrite(LED, HIGH);
   button.waitForButton();
-  digitalWrite(LED, LOW);
    
   // play audible countdown
   for (int i = 0; i < 3; i++)
@@ -62,32 +63,16 @@ void waitForButtonAndCountDown()
   delay(1000);
 }
 
-void TurnL() 
+void Turn(int turnDirection = 1) 
 {   
   int amtChecks = 100;
   byte var=0;
   while(var<amtChecks)
   {    
-    Serial.println("checking L");
-    motors.setSpeeds(-TURN_SPEED, TURN_SPEED);
+    Serial.println("checking" + turnDirection == 1 ? "Left" : "Right");
+    motors.setSpeeds(turnDirection * -TURN_SPEED, turnDirection * TURN_SPEED);
    delay(3000/amtChecks);
 
-    var++;
-    cm = sonar.ping_cm();
-    if((cm <PUSH_DISTANCE)&&(cm>0))break;
-  }
-}
-
-void TurnR() 
-{   
-  int amtChecks = 100;
-  byte var=0;
-  while(var<amtChecks)
-  {    
-    Serial.println("checking R");
-    motors.setSpeeds(TURN_SPEED, -TURN_SPEED);
-   delay(3000/amtChecks);
-  
     var++;
     cm = sonar.ping_cm();
     if((cm <PUSH_DISTANCE)&&(cm>0))break;
@@ -128,9 +113,9 @@ void Forward()
 
 void setup() 
 {
-  //pinMode(LED, HIGH); 
   Serial.begin(115200);
   waitForButtonAndCountDown();
+  flipper.attach(SERVO_PIN);
 }
 
 void loop() 
@@ -142,31 +127,38 @@ void loop()
     motors.setSpeeds(0, 0);
     button.waitForRelease();
     waitForButtonAndCountDown();//Execute countdown
-  }
-  cmR = sonarR.ping_cm();  
- 
-  cmL = sonarL.ping_cm();  
-
-  cmB = sonarB.ping_cm();  
-  
+  }  
 
   Forward();//Forward Subroutine is repetatively executed 
+
+  cmR = sonarR.ping_cm();  
+  cmL = sonarL.ping_cm();  
   
   //with code below for Border detect
   if ((sensor_values[0] > QTR_THRESHOLD)||(sensor_values[5] > QTR_THRESHOLD))
   {
     Serial.println("hitBorder");
     Reverse();
-    TurnL();
+    Turn(1);
   }
   else if (cmL<50 && cmL>0)
   {
-   TurnL();
+   Turn(1);
    Serial.println("Left");
   }
   else if (cmR<50 && cmR>0)
   {
-   TurnR();
+   Turn(-1);
    Serial.println("Leftleftleft");
+  }
+
+  cm = sonar.ping_cm();
+  if (cm <= FLIPPER_DISTANCE)
+  {
+    flipper.write(flippedAngle);
+  }
+  else
+  {
+    flipper.write(restingAngle);
   }
 }

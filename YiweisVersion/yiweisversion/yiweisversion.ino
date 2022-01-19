@@ -45,7 +45,7 @@ unsigned int var;
 ZumoReflectanceSensorArray sensors(QTR_NO_EMITTER_PIN);
    
 long cm, cmL, cmR;
-int pos, restingAngle = 20, flippedAngle = 60;
+int restingAngle = 20, flippedAngle = 60, pos = restingAngle;
 
 
 void waitForButtonAndCountDown()
@@ -65,7 +65,7 @@ void waitForButtonAndCountDown()
 
 void Turn(int turnDirection = 1) 
 {   
-  int amtChecks = 100;
+  int amtChecks = 30;
   byte var=0;
   while(var<amtChecks)
   {    
@@ -153,12 +153,18 @@ void loop()
   }
 
   cm = sonar.ping_cm();
-  if (cm <= FLIPPER_DISTANCE)
+  if (cm <= FLIPPER_DISTANCE && pos !=flippedAngle)
   {
-    flipper.write(flippedAngle);
+    for (;pos <flippedAngle;pos+=2)
+    {
+      flipper.write(flippedAngle);      
+    }
   }
-  else
+  else if (pos != restingAngle)
   {
-    flipper.write(restingAngle);
+    for (;pos > restingAngle;pos-=2)
+    {
+      flipper.write(restingAngle);     
+    }
   }
 }

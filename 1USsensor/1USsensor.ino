@@ -9,27 +9,24 @@
 #define ECHO_PIN     A0
 #define ECHO_PINL     2  
 #define ECHO_PINR     11
-#define ECHO_PINB     13
 #define MAX_DISTANCE 200 // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
 #define PUSH_DISTANCE 10
 
 NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);  
 NewPing sonarL(TRIGGER_PIN, ECHO_PINL, MAX_DISTANCE); 
 NewPing sonarR(TRIGGER_PIN, ECHO_PINR, MAX_DISTANCE);
-NewPing sonarB(TRIGGER_PIN, ECHO_PINB, MAX_DISTANCE);
 
-#define LED 13
 #define QTR_THRESHOLD  1000 // my robot 300
   
 // these might need to be tuned for different motor types
-#define REVERSE_SPEED     100 // 0 is stopped, 400 is full speed
-#define TURN_SPEED        80
-#define FORWARD_SPEEDL     310
-#define FORWARD_SPEEDR     300
+#define REVERSE_SPEED     200 // 0 is stopped, 400 is full speed
+#define TURN_SPEED        200
+#define FORWARD_SPEEDL     810
+#define FORWARD_SPEEDR     800
 #define FORWARD_PUSH       800
 #define REVERSE_DURATION  20 // ms
 #define FORWARD_DURATION  100 // ms
-#define TURN_DURATION     80 // ms
+#define TURN_DURATION     40 // ms
  
 ZumoBuzzer buzzer;
 ZumoMotors motors;
@@ -41,13 +38,13 @@ unsigned int var;
  
 ZumoReflectanceSensorArray sensors(QTR_NO_EMITTER_PIN);
    
-long cm, cmL, cmR, cmB;
+long cm, cmL, cmR;
+
+
 
 void waitForButtonAndCountDown()
 {
-  //digitalWrite(LED, HIGH);
   button.waitForButton();
-  digitalWrite(LED, LOW);
    
   // play audible countdown
   for (int i = 0; i < 3; i++)
@@ -126,7 +123,6 @@ void Forward()
 
 void setup() 
 {
-  //pinMode(LED, HIGH); 
   Serial.begin(115200);
   waitForButtonAndCountDown();
 }
@@ -145,7 +141,6 @@ void loop()
  
   cmL = sonarL.ping_cm();  
 
-  cmB = sonarB.ping_cm();  
   
 
   Forward();//Forward Subroutine is repetatively executed 
@@ -157,14 +152,14 @@ void loop()
     Reverse();
     TurnL();
   }
-  else if (cmL<50 && cmL>0)
+  else if ((cmL<50) && (cmL>0))
   {
    TurnL();
    Serial.println("Left");
   }
-  else if (cmR<50 && cmR>0)
+  else if ((cmR<50) && (cmR>0))
   {
    TurnR();
-   Serial.println("Leftleftleft");
+   Serial.println("Right");
   }
 }

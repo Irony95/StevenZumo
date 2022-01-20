@@ -4,11 +4,13 @@
 #include <QTRSensors.h>
 #include <ZumoReflectanceSensorArray.h>
 #include <NewPing.h>
+#include <Servo.h>
 
 #define TRIGGER_PIN  6 // Arduino pin tied to trigger pin on the ultrasonic sensor.
 #define ECHO_PIN     A0
 #define ECHO_PINL     2  
 #define ECHO_PINR     11
+#define SERVO_PIN 13
 #define MAX_DISTANCE 200 // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
 #define PUSH_DISTANCE 10
 
@@ -22,8 +24,8 @@ NewPing sonarR(TRIGGER_PIN, ECHO_PINR, MAX_DISTANCE);
 #define REVERSE_SPEED     200 // 0 is stopped, 400 is full speed
 #define TURN_SPEED        200
 #define FORWARD_SPEEDL     810
-#define FORWARD_SPEEDR     800
-#define FORWARD_PUSH       800
+#define FORWARD_SPEEDR     300
+#define FORWARD_PUSH       300
 #define REVERSE_DURATION  20 // ms
 #define FORWARD_DURATION  100 // ms
 #define TURN_DURATION     40 // ms
@@ -39,6 +41,8 @@ unsigned int var;
 ZumoReflectanceSensorArray sensors(QTR_NO_EMITTER_PIN);
    
 long cm, cmL, cmR;
+Servo flipper;
+int restingAngle = 20, flippedAngle=100, pos = restingAngle;
 
 
 
@@ -99,6 +103,24 @@ void Forward()
 { 
   cm = sonar.ping_cm();
   delay(10);
+  if (cm < 5 && cm != 0)
+  {
+    if (pos < flippedAngle)
+    {
+      pos += 2;
+    }
+    Serial.println("fliped");
+    flipper.write(pos);
+  }
+  else
+  {
+    if (pos > restingAngle)
+    {
+      pos -= 2;
+    }
+    Serial.println("not fliped");
+    flipper.write(pos);
+  }
   
   sensors.read(sensor_values);
   //Charging
@@ -125,6 +147,8 @@ void setup()
 {
   Serial.begin(115200);
   waitForButtonAndCountDown();
+
+  flipper.attach(SERVO_PIN);
 }
 
 void loop() 

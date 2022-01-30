@@ -41,7 +41,7 @@ unsigned int var;
 ZumoReflectanceSensorArray sensors(QTR_NO_EMITTER_PIN);
    
 long cm, cmL, cmR;
-int restingAngle = 60, flippedAngle=100;
+int restingAngle = 20, flippedAngle=100;
 Adafruit_SoftServo flipper;
 
 void waitForButtonAndCountDown()
@@ -121,6 +121,7 @@ void Forward()
     buzzer.playNote(NOTE_G(4), 500, 10);//Buzzer tone signaling normal mode
   }  
 
+  //flipper flipping yoo
   if (cm < 10 && cm != 0)
   {
     Serial.println("flipped");
@@ -156,6 +157,7 @@ void loop()
     button.waitForRelease();
     waitForButtonAndCountDown();//Execute countdown
   }
+  
   cmR = sonarR.ping_cm();  
  
   cmL = sonarL.ping_cm();  
@@ -182,6 +184,8 @@ void loop()
    Serial.println("Right");
   }
 }
+
+
 volatile uint8_t counter = 0;
 SIGNAL(TIMER0_COMPA_vect) {
   // this gets called every 2 milliseconds

@@ -4,7 +4,7 @@
 #include <QTRSensors.h>
 #include <ZumoReflectanceSensorArray.h>
 #include <NewPing.h>
-#include <Servo.h>
+#include <Adafruit_SoftServo.h>
 
 #define TRIGGER_PIN  6 // Arduino pin tied to trigger pin on the ultrasonic sensor.
 #define ECHO_PIN     A0
@@ -41,10 +41,8 @@ unsigned int var;
 ZumoReflectanceSensorArray sensors(QTR_NO_EMITTER_PIN);
    
 long cm, cmL, cmR;
-Servo flipper;
 int restingAngle = 60, flippedAngle=100;
-
-
+Adafruit_SoftServo flipper;
 
 void waitForButtonAndCountDown()
 {
@@ -109,7 +107,6 @@ void Forward()
   //Charging
   if((cm <PUSH_DISTANCE)&&(cm>0) &&(sensor_values[0] < QTR_THRESHOLD)&&(sensor_values[5] < QTR_THRESHOLD))
   {
-    Serial.println("PUSHSS");
     motors.setSpeeds(FORWARD_PUSH, FORWARD_PUSH);
     delay(250);
     motors.setSpeeds(FORWARD_SPEEDL, FORWARD_SPEEDR); 
@@ -120,18 +117,33 @@ void Forward()
   //Normal forward Movement
   else if((cm >=PUSH_DISTANCE)||(cm==0))
   {
-    Serial.println("usual");
     motors.setSpeeds(FORWARD_SPEEDL, FORWARD_SPEEDR); 
     buzzer.playNote(NOTE_G(4), 500, 10);//Buzzer tone signaling normal mode
   }  
+
+  if (cm < 10 && cm != 0)
+  {
+    Serial.println("flipped");
+    flipper.write(flippedAngle);
+  }
+  else if (cm > 10 || cm == 0)
+  {
+    Serial.println("resting");
+    flipper.write(restingAngle);
+  }
 }
 
 void setup() 
 {
-  Serial.begin(115200);
-  waitForButtonAndCountDown();
+
+   // Set up the interrupt that will refresh the servo for us automagically
+  OCR0A = 0xAF;            // any number is OK
+  TIMSK0 |= _BV(OCIE0A);    // Turn on the compare interrupt (below!)
 
   flipper.attach(SERVO_PIN);
+  
+  Serial.begin(115200);
+  waitForButtonAndCountDown();  
 }
 
 void loop() 
@@ -168,5 +180,15 @@ void loop()
   {
    TurnR();
    Serial.println("Right");
+  }
+}
+volatile uint8_t counter = 0;
+SIGNAL(TIMER0_COMPA_vect) {
+  // this gets called every 2 milliseconds
+  counter += 2;
+  // every 20 milliseconds, refresh the servos!
+  if (counter >= 20) {
+    counter = 0;
+    flipper.refresh();   
   }
 }

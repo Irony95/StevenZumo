@@ -42,7 +42,7 @@ ZumoReflectanceSensorArray sensors(QTR_NO_EMITTER_PIN);
    
 long cm, cmL, cmR;
 Servo flipper;
-int restingAngle = 20, flippedAngle=100, pos = restingAngle;
+int restingAngle = 60, flippedAngle=100;
 
 
 
@@ -103,24 +103,7 @@ void Forward()
 { 
   cm = sonar.ping_cm();
   delay(10);
-  if (cm < 5 && cm != 0)
-  {
-    if (pos < flippedAngle)
-    {
-      pos += 2;
-    }
-    Serial.println("fliped");
-    flipper.write(pos);
-  }
-  else
-  {
-    if (pos > restingAngle)
-    {
-      pos -= 2;
-    }
-    Serial.println("not fliped");
-    flipper.write(pos);
-  }
+  
   
   sensors.read(sensor_values);
   //Charging

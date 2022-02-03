@@ -4,13 +4,13 @@
 #include <QTRSensors.h>
 #include <ZumoReflectanceSensorArray.h>
 #include <NewPing.h>
-#include <Servo.h>
+#include <Adafruit_SoftServo.h>
 
 #define TRIGGER_PIN  6 // Arduino pin tied to trigger pin on the ultrasonic sensor.
 #define ECHO_PIN     A0
 #define ECHO_PINL     2  
 #define ECHO_PINR     11
-#define SERVO_PIN 13
+#define SERVO_PIN     13
 #define MAX_DISTANCE 200 // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
 #define PUSH_DISTANCE 10
 
@@ -41,9 +41,8 @@ unsigned int var;
 ZumoReflectanceSensorArray sensors(QTR_NO_EMITTER_PIN);
    
 long cm, cmL, cmR;
-Servo flipper;
-int restingAngle = 20, flippedAngle=100, pos = restingAngle;
-
+Adafruit_SoftServo flipper;
+int restingAngle = 60, flippedAngle=100, pos = restingAngle;
 
 
 void waitForButtonAndCountDown()
@@ -63,7 +62,7 @@ void waitForButtonAndCountDown()
 
 void TurnL() 
 {   
-  int amtChecks = 100;
+  int amtChecks = 30;
   byte var=0;
   while(var<amtChecks)
   {    
@@ -79,7 +78,7 @@ void TurnL()
 
 void TurnR() 
 {   
-  int amtChecks = 100;
+  int amtChecks = 30;
   byte var=0;
   while(var<amtChecks)
   {    
@@ -96,7 +95,7 @@ void TurnR()
 void Reverse() 
 {
   motors.setSpeeds(-REVERSE_SPEED, -REVERSE_SPEED);
-  delay(1000);
+  delay(100);
 }
   
 void Forward() 
@@ -105,21 +104,11 @@ void Forward()
   delay(10);
   if (cm < 5 && cm != 0)
   {
-    if (pos < flippedAngle)
-    {
-      pos += 2;
-    }
-    Serial.println("fliped");
-    flipper.write(pos);
+    flipper.write(flippedAngle);
   }
-  else
+  else if (cm > 5 || cm == 0)
   {
-    if (pos > restingAngle)
-    {
-      pos -= 2;
-    }
-    Serial.println("not fliped");
-    flipper.write(pos);
+    flipper.write(restingAngle);
   }
   
   sensors.read(sensor_values);
@@ -145,6 +134,10 @@ void Forward()
 
 void setup() 
 {
+// Set up the interrupt that will refresh the servo for us automagically
+  OCR0A = 0xAF;            // any number is OK
+  TIMSK0 |= _BV(OCIE0A);    // Turn on the compare interrupt (below!)
+  
   Serial.begin(115200);
   waitForButtonAndCountDown();
 
@@ -185,5 +178,18 @@ void loop()
   {
    TurnR();
    Serial.println("Right");
+  }
+}
+
+// We'll take advantage of the built in millis() timer that goes off
+// to keep track of time, and refresh the servo every 20 milliseconds
+volatile uint8_t counter = 0;
+SIGNAL(TIMER0_COMPA_vect) {
+  // this gets called every 2 milliseconds
+  counter += 2;
+  // every 20 milliseconds, refresh the servos!
+  if (counter >= 20) {
+    counter = 0;
+    flipper.refresh();
   }
 }

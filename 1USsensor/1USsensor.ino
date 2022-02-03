@@ -18,12 +18,12 @@ NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
 NewPing sonarL(TRIGGER_PIN, ECHO_PINL, MAX_DISTANCE); 
 NewPing sonarR(TRIGGER_PIN, ECHO_PINR, MAX_DISTANCE);
 
-#define QTR_THRESHOLD  1000 // my robot 300
+#define QTR_THRESHOLD  1000
   
 // these might need to be tuned for different motor types
 #define REVERSE_SPEED     200 // 0 is stopped, 400 is full speed
 #define TURN_SPEED        200
-#define FORWARD_SPEEDL     810
+#define FORWARD_SPEEDL     300
 #define FORWARD_SPEEDR     300
 #define FORWARD_PUSH       300
 #define REVERSE_DURATION  20 // ms
@@ -41,15 +41,15 @@ unsigned int var;
 ZumoReflectanceSensorArray sensors(QTR_NO_EMITTER_PIN);
    
 long cm, cmL, cmR;
+
 Adafruit_SoftServo flipper;
-int restingAngle = 60, flippedAngle=100, pos = restingAngle;
+int restingAngle = 60, flippedAngle=100;
 
 
 void waitForButtonAndCountDown()
 {
   button.waitForButton();
    
-  // play audible countdown
   for (int i = 0; i < 3; i++)
   {
     delay(1000);

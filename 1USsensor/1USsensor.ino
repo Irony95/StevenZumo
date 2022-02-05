@@ -11,8 +11,11 @@
 #define ECHO_PINL     2  
 #define ECHO_PINR     11
 #define SERVO_PIN     13
+
 #define MAX_DISTANCE 200 // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
 #define PUSH_DISTANCE 10
+#define DETECT_DISTANCE 25
+#define FLIPPED_DISTANCE 5
 
 NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);  
 NewPing sonarL(TRIGGER_PIN, ECHO_PINL, MAX_DISTANCE); 
@@ -36,15 +39,13 @@ Pushbutton button(ZUMO_BUTTON); // pushbutton on pin 12
 
 #define NUM_SENSORS 6
 unsigned int sensor_values[NUM_SENSORS];
-unsigned int var;
  
 ZumoReflectanceSensorArray sensors(QTR_NO_EMITTER_PIN);
    
 long cm, cmL, cmR;
 
 Adafruit_SoftServo flipper;
-int restingAngle = 35, flippedAngle=120;
-int flippedDistance = 5;
+int restingAngle = 32, flippedAngle = 120;
 
 
 void waitForButtonAndCountDown()
@@ -63,11 +64,12 @@ void waitForButtonAndCountDown()
 
 void TurnL() 
 {   
+  Serial.println("turn L");
+  
   int amtChecks = 30;
   byte var=0;
   while(var<amtChecks)
   {    
-    Serial.println("checking L");
     motors.setSpeeds(-TURN_SPEED, TURN_SPEED);
    delay(3000/amtChecks);
 
@@ -79,11 +81,12 @@ void TurnL()
 
 void TurnR() 
 {   
+  Serial.println("turn R");
+  
   int amtChecks = 30;
   byte var=0;
   while(var<amtChecks)
   {    
-    Serial.println("checking R");
     motors.setSpeeds(TURN_SPEED, -TURN_SPEED);
    delay(3000/amtChecks);
   
@@ -95,6 +98,7 @@ void TurnR()
 
 void Reverse() 
 {
+  Serial.println("Reverse");
   motors.setSpeeds(-REVERSE_SPEED, -REVERSE_SPEED);
   delay(100);
 }
@@ -103,11 +107,11 @@ void Forward()
 { 
   cm = sonar.ping_cm();
   delay(10);
-  if (cm < flippedDistance && cm != 0)
+  if (cm < FLIPPED_DISTANCE && cm != 0)
   {
     flipper.write(flippedAngle);
   }
-  else if (cm > flippedDistance || cm == 0)
+  else if (cm > FLIPPED_DISTANCE || cm == 0)
   {
     flipper.write(restingAngle);
   }
@@ -167,19 +171,18 @@ void loop()
   if ((sensor_values[0] > QTR_THRESHOLD)||(sensor_values[5] > QTR_THRESHOLD))
   {
     Serial.println("hitBorder");
+    flipper.write(restingAngle);
     Reverse();
     TurnL();
   }
-  else if ((cmL<50) && (cmL>0))
+  else if ((cmL<DETECT_DISTANCE) && (cmL>0))
   {
-   TurnL();
-   Serial.println("Left");
+   TurnL();   
   }
-  else if ((cmR<50) && (cmR>0))
+  else if ((cmR<DETECT_DISTANCE) && (cmR>0))
   {
-   TurnR();
-   Serial.println("Right");
-  }
+   TurnR();   
+  } 
 }
 
 // We'll take advantage of the built in millis() timer that goes off

@@ -43,7 +43,6 @@ void setup()
  
 void loop()
 {
-  motors.setSpeeds(800,800);
   int cm = sonar.ping_cm();
   Serial.println(cm);
   if (cm < 5 && cm != 0)
@@ -54,7 +53,7 @@ void loop()
   else if (cm > 5 || cm == 0)
   {
     Serial.println("resting");
-    flipper.write(45);
+    flipper.write(33);
   }
 }
 

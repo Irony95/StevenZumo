@@ -43,17 +43,18 @@ void setup()
  
 void loop()
 {
-  motors.setSpeeds(200,200);
+  motors.setSpeeds(800,800);
   int cm = sonar.ping_cm();
-  if (cm < 10 && cm != 0)
+  Serial.println(cm);
+  if (cm < 5 && cm != 0)
   {
     Serial.println("flipped");
-    flipper.write(20);
+    flipper.write(120);
   }
-  else if (cm > 10 || cm == 0)
+  else if (cm > 5 || cm == 0)
   {
     Serial.println("resting");
-    flipper.write(100);
+    flipper.write(45);
   }
 }
 

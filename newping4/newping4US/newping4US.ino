@@ -12,13 +12,11 @@
 #define ECHO_PIN     A0
 #define ECHO_PINL     2  
 #define ECHO_PINR     11
-#define ECHO_PINB     13
 #define MAX_DISTANCE 200 // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
 
 NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);  
 NewPing sonarL(TRIGGER_PIN, ECHO_PINL, MAX_DISTANCE); 
 NewPing sonarR(TRIGGER_PIN, ECHO_PINR, MAX_DISTANCE);
-NewPing sonarB(TRIGGER_PIN, ECHO_PINB, MAX_DISTANCE);
 
 long cm, cmL, cmR, cmB;
 
@@ -36,8 +34,7 @@ void loop() {
  
   cmL = sonarL.ping_cm();
   delay(50);    
-
-  cmB = sonarB.ping_cm();
+  
   delay(50);   
   Serial.print("Front: ");
   Serial.print(cm); 
@@ -49,9 +46,5 @@ void loop() {
 
   Serial.print("  Left ");
   Serial.print(cmL); 
-  Serial.print("cm");
-
-  Serial.print("  Back ");
-  Serial.print(cmB); 
-  Serial.println("cmB");
+  Serial.println("cm");
 }

@@ -23,9 +23,9 @@ NewPing sonarR(TRIGGER_PIN, ECHO_PINR, MAX_DISTANCE);
 // these might need to be tuned for different motor types
 #define REVERSE_SPEED     200 // 0 is stopped, 400 is full speed
 #define TURN_SPEED        200
-#define FORWARD_SPEEDL     300
-#define FORWARD_SPEEDR     300
-#define FORWARD_PUSH       300
+#define FORWARD_SPEEDL     500
+#define FORWARD_SPEEDR     500
+#define FORWARD_PUSH       800
 #define REVERSE_DURATION  20 // ms
 #define FORWARD_DURATION  100 // ms
 #define TURN_DURATION     40 // ms
@@ -43,7 +43,8 @@ ZumoReflectanceSensorArray sensors(QTR_NO_EMITTER_PIN);
 long cm, cmL, cmR;
 
 Adafruit_SoftServo flipper;
-int restingAngle = 60, flippedAngle=100;
+int restingAngle = 35, flippedAngle=120;
+int flippedDistance = 5;
 
 
 void waitForButtonAndCountDown()
@@ -102,11 +103,11 @@ void Forward()
 { 
   cm = sonar.ping_cm();
   delay(10);
-  if (cm < 5 && cm != 0)
+  if (cm < flippedDistance && cm != 0)
   {
     flipper.write(flippedAngle);
   }
-  else if (cm > 5 || cm == 0)
+  else if (cm > flippedDistance || cm == 0)
   {
     flipper.write(restingAngle);
   }

@@ -4,7 +4,6 @@
 #include <QTRSensors.h>
 #include <ZumoReflectanceSensorArray.h>
 #include <NewPing.h>
-#include <Servo.h>
 
 #define TRIGGER_PIN  6 // Arduino pin tied to trigger pin on the ultrasonic sensor.
 #define ECHO_PIN     A0
@@ -43,8 +42,6 @@ unsigned int var;
 ZumoReflectanceSensorArray sensors(QTR_NO_EMITTER_PIN);
    
 long cm, cmL, cmR;
-Servo myservo;
-Int pos = 0
 
 
 void waitForButtonAndCountDown()
@@ -148,8 +145,7 @@ void loop()
   cmR = sonarR.ping_cm();  
  
   cmL = sonarL.ping_cm();  
-
-  cmB = sonarB.ping_cm();  
+  
   
 
   Forward();//Forward Subroutine is repetatively executed 
